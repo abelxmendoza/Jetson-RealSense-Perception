@@ -1,6 +1,8 @@
 # Jetson RealSense Perception Toolkit
 
-A robotics perception toolkit built for the **NVIDIA Jetson Orin Nano** using the **Intel RealSense D455 RGB-D camera**.
+![Jetson RealSense Perception Toolkit](./Jetson-RealSense-PerceptionProject.png)
+
+**Embedded RGB-D perception system for robotics using Jetson Orin Nano and Intel RealSense cameras.**
 
 This project demonstrates core perception capabilities used in **autonomous robots and drones**, including:
 
@@ -24,21 +26,23 @@ The scripts in this repository explore how depth cameras can be used for **robot
 
 ## System Architecture
 
+Getting this pipeline running on an embedded GPU system is a system-integration task: sensor → SDK → bindings → your logic → hardware.
+
 ```
-RealSense Camera
-       ↓
+Intel RealSense D455
+        ↓
 librealsense SDK
-       ↓
-pyrealsense2 Python bindings
-       ↓
-OpenCV / NumPy Processing
-       ↓
-Perception Modules
-  • obstacle detection
-  • point cloud capture
-  • feature tracking
-  • occupancy mapping
+        ↓
+pyrealsense2
+        ↓
+Python perception modules
+        ↓
+OpenCV / NumPy processing
+        ↓
+Jetson Orin Nano (embedded system)
 ```
+
+Perception modules: obstacle detection, point cloud capture, feature tracking, occupancy mapping.
 
 ---
 
@@ -268,11 +272,12 @@ pip3 install numpy opencv-python open3d
 
 Potential extensions for this project include:
 
+- **Real navigation module** — Turn obstacle detection into a decision system: compute left/right free space → choose safest direction → output command (FORWARD / TURN LEFT / TURN RIGHT / STOP).
+- **Object detection + depth fusion** — YOLOv8 / TensorRT / ONNX with depth fusion (e.g. *Detected: person, 1.8 m, approaching*) for RGB-D perception.
+- **Persistent 3D map** — Depth → point cloud accumulation → voxel grid → saved map file (full 3D environment mapping).
 - ROS2 sensor publishing
 - SLAM integration
 - GPU-accelerated depth processing
-- RGB-D object detection
-- Autonomous navigation experiments
 - Drone perception pipelines
 
 ---
