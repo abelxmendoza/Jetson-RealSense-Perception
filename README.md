@@ -4,6 +4,10 @@
   <img src="./Jetson-RealSense-PerceptionProject.png" alt="Jetson RealSense Perception Project" width="800"/>
 </p>
 
+<p align="center">
+  <img src="./JetsonVision.jpeg" alt="Jetson Vision" width="800"/>
+</p>
+
 **Embedded RGB-D perception system for robotics using Jetson Orin Nano and Intel RealSense cameras.**
 
 ---
