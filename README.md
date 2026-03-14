@@ -1,177 +1,141 @@
-# Jetson RealSense Perception Toolkit
+# Jetson-RealSense-Perception
 
-![Jetson RealSense Perception Toolkit](./Jetson-RealSense-PerceptionProject.png)
+## Project Identity
 
-**Embedded RGB-D perception system for robotics using Jetson Orin Nano and Intel RealSense cameras.**
+**Jetson-RealSense-Perception** is a Jetson Orin Nano embedded robotics perception sandbox running on an Intel RealSense D455 RGB-D camera. It is built for hands-on development, real-time evaluation, and portfolio-ready demos for autonomy/research systems in real-world robotics contexts.
 
-This project demonstrates core perception capabilities used in **autonomous robots and drones**, including:
-- RGB-D sensing
-- Real-time obstacle detection
-- 3D point cloud capture
-- Feature tracking
-- IMU streaming
-- Real-time occupancy grid mapping
+- Host: NVIDIA Jetson Orin Nano (primary runtime)
+- Camera: Intel RealSense D455
+- OS: Ubuntu (Jetson JetPack), with `python3`, `pyrealsense2`, `numpy`, `opencv-python`
+- Workspace: `/home/omega/Desktop/Jetson-RealSense-Perception`
 
-The scripts in this repository explore how depth cameras can be used for **robot navigation, environment perception, and 3D mapping**.
+## Goals
 
----
+- Reliable Jetson-based depth + rgb video capture
+- Obstacle detection and safe zone monitoring
+- Point cloud scanning and offline visualization
+- IMU data ingestion and sensor fusion readiness
+- 3D mapping / occupancy-grid radar-style prototyping
+- Easy SSH + remote dev workflow by ethernet
 
-## Hardware
+## Hardware Used
 
 - NVIDIA Jetson Orin Nano
-- Intel RealSense D455 RGB-D Camera
+- Intel RealSense D455 RGB-D depth camera
+- Monitor attached to Jetson for OpenCV windows
+- Wired ethernet between laptop and Jetson (192.168.50.1 <-> 192.168.50.2)
 
----
+## Software Stack
 
-## System Architecture
+- Python 3 (system default on Jetson)
+- pyrealsense2
+- numpy
+- opencv-python
+- open3d (for `view_scan.py` only)
 
-Getting this pipeline running on an embedded GPU system is a system-integration task: sensor → SDK → bindings → your logic → hardware.
+## Repository Structure
 
-```
-Intel RealSense D455
-        ↓
-librealsense SDK
-        ↓
-pyrealsense2
-        ↓
-Python perception modules
-        ↓
-OpenCV / NumPy processing
-        ↓
-Jetson Orin Nano (embedded system)
-```
+- `realsense_view.py` - basic RGB-D camera stream and center depth overlay
+- `obstacle_detector.py` - navigation zone obstacle warning and visual indicator
+- `point_cloud_capture.py` - capture and save point cloud data to `scan.npz`
+- `view_scan.py` - open3d visualization of saved point cloud scans
+- `simple_tracking.py` - ORB feature tracking / visual flow diagnostics
+- `imu_stream.py` - RealSense accelerometer and gyroscope stream + graphs
+- `radar_mapper.py` - occupancy-grid radar mapping prototype
+- `README.md`, `Jetson-RealSense-PerceptionProject.png`, `.gitignore`
 
-Perception modules: obstacle detection, point cloud capture, feature tracking, occupancy mapping.
+## Usage (Jetson runtime)
 
----
-
-## Scripts
-
-### 1. `realsense_view.py` — Basic Viewer
-
-Simple RGB and depth stream viewer. This is the **starting point** for verifying camera operation.
-
-**Usage:**
+### 1. Start with camera validation
 
 ```bash
+cd /home/omega/Desktop/Jetson-RealSense-Perception
 python3 realsense_view.py
 ```
 
-Press `q` to quit.
-
----
-
-### 2. `obstacle_detector.py` — Navigation Helper
-
-Real-time obstacle detection with distance warnings. A navigation zone in the center of the image is monitored for objects that are too close.
-
-**Usage:**
+### 2. Run obstacle detection
 
 ```bash
 python3 obstacle_detector.py
 ```
 
-**Features:**
-
-- Yellow rectangle shows the monitored navigation zone
-- Green text = clear path
-- Red text = obstacle detected (< 0.5m)
-- Press `q` to quit
-
----
-
-### 3. `point_cloud_capture.py` — 3D Scanning
-
-Capture 3D point clouds from the camera and save them for later visualization.
-
-**Usage:**
+### 3. Capture 3D scans
 
 ```bash
 python3 point_cloud_capture.py
+# Press 's' to save scan.npz; 'q' to quit
 ```
 
-**Controls:**
-
-- Press `s` to save the current frame as a point cloud
-- Press `q` to quit
-
-Saved scans are stored as: `scan.npz`
-
----
-
-### 4. `view_scan.py` — Point Cloud Viewer
-
-Visualize saved point cloud scans in 3D.
-
-**Requirements:**
+### 4. View scans
 
 ```bash
 pip3 install open3d
+python3 view_scan.py [scan.npz]
 ```
 
-**Usage:**
-
-```bash
-python3 view_scan.py [scan_file.npz]
-```
-
-If no file is specified, defaults to `scan.npz`.
-
----
-
-### 5. `simple_tracking.py` — Feature Tracking
-
-Basic visual feature tracking for understanding camera movement. Shows how features are matched between frames.
-
-**Usage:**
-
-```bash
-python3 simple_tracking.py
-```
-
-- Shows feature matches between consecutive frames
-- Prints tracking statistics to console
-- Press `q` to quit
-
----
-
-### 6. `imu_stream.py` — IMU Data Streaming
-
-Stream and visualize accelerometer and gyroscope data from the RealSense camera's built-in IMU.
-
-**Usage:**
+### 5. IMU streaming
 
 ```bash
 python3 imu_stream.py
 ```
 
-- Real-time graphs of accelerometer (X, Y, Z) and gyroscope (X, Y, Z) data
-- Calculates pitch and roll from accelerometer
-- Shows motion magnitude
-- Press `s` to save IMU data to file
-- Press `q` to quit
-
-**Note:** Requires a RealSense camera with IMU (D435i, D455, etc.)
-
----
-
-### 7. `radar_mapper.py` — 3D Radar Mapper
-
-Live 3D occupancy grid mapper with radar-style top-down view. Builds a map in real-time as you scan with the camera.
-
-**Usage:**
+### 6. Radar mapper
 
 ```bash
 python3 radar_mapper.py
 ```
 
-- **Top-down radar view**: Green dots show occupied space (like a radar sweep)
-- **Side view**: X-Z plane visualization
-- **Live camera feed**: RGB and depth streams
-- **Occupancy grid**: 2cm resolution grid showing free/occupied space
-- Press 'c' to clear the map
-- Press 's' to save the map
-- Press 'q' to quit
+## GUI over SSH
 
-**Features:**
-- Real-time 3D mapping as you move the camera
+When running on Jetson from laptop SSH session, use:
+
+```bash
+DISPLAY=:0 XAUTHORITY=/home/omega/.Xauthority python3 <script>.py
+```
+
+This ensures UI windows render on Jetson-connected monitor.
+
+## Networking / Dev Workflow
+
+- Jetson IP: `192.168.50.2` on `eno1`
+- Laptop IP: `192.168.50.1`
+- Check link and state:
+
+```bash
+sudo nmcli connection up eno1
+sudo nmcli connection modify eno1 connection.autoconnect yes
+ping 192.168.50.1
+```
+
+## Known Issues / Limitations
+
+- RealSense D455 close range (<0.5m) is less stable; avoid over-reliance with short object distance unless re-calibrated.
+- `radar_mapper.py` is heavy; may require Jetson memory budget monitoring and careful runtime.
+- Do not commit `scan.npz`; `.gitignore` includes `*.npz`.
+- Power stability: verify firm barrel jack seating after hard resets.
+
+## Future Work
+
+- Add optional ROS2 node wrappers for key modules
+- Add recording-mode command-line arguments via `argparse` for each script
+- Add `systemd` service wrapper for startup reprovisioning and auto-restart
+- Add MQTT or HTTP telemetry output for remote monitoring
+- Add data logging (timestamps + CSV) for regression tests
+
+## Demo / Screenshots
+
+- `Jetson-RealSense-PerceptionProject.png`: project card artwork
+- capture screenshot and paste here from Jetson monitor
+
+## Contribution and Branching
+
+1. Keep mastable branch lean, from actual tested Jetson behavior
+2. Open PRs for feature enhancements with runtime evidence / logs
+3. Preserve existing pipeline stop/cleanup patterns
+
+## Checklist before committing
+
+- [x] `pyrealsense2`, `opencv-python`, `numpy` installed
+- [x] `.gitignore` has `__pycache__/`, `*.pyc`, `*.npz`
+- [x] script works with `DISPLAY`/`XAUTHORITY` on remote shell
+
