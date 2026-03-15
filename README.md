@@ -1,231 +1,207 @@
-# Jetson RealSense Perception Toolkit
+# Jetson RealSense Perception
 
 <p align="center">
-  <img src="./Jetson-RealSense-PerceptionProject.png" alt="Jetson RealSense Perception Project" width="800"/>
+  <img src="./Jetson-RealSense-PerceptionProject.png" alt="Jetson RealSense Perception" width="700"/>
 </p>
 
-<p align="center">
-  <img src="./JetsonVision.jpeg" alt="Jetson Vision" width="800"/>
-</p>
-
-**Embedded RGB-D perception system for robotics using Jetson Orin Nano and Intel RealSense cameras.**
+Embedded RGB-D perception toolkit for **NVIDIA Jetson Orin Nano** and **Intel RealSense D455**. Supports standalone Python (pyrealsense2) and ROS2 Humble workflows. Developed and validated on Ubuntu 22.04 / JetPack L4T 36.4.7.
 
 ---
 
-## Table of contents
+## What This Repo Is
 
-- [Overview](#overview)
-- [Hardware](#hardware)
-- [System architecture](#system-architecture)
-- [Scripts](#scripts)
-- [Getting started](#getting-started)
-- [Requirements](#requirements)
-- [Tips](#tips)
-- [Future work](#future-work)
-- [License](#license)
+- **Standalone scripts** — Direct RealSense access via `pyrealsense2` for streaming, capture, obstacle detection, point clouds, IMU, and occupancy-style mapping.
+- **ROS2 integration** — Validation scripts and utilities for the [RealSense ROS2 wrapper](https://github.com/realsenseai/realsense-ros); launch and sanity checks.
+- **Documentation** — Hardware/software setup, ROS2 setup, troubleshooting, and a validation checklist so another engineer can reproduce the stack.
 
 ---
 
-## Overview
+## Hardware & Software Stack
 
-This toolkit provides **perception pipelines** for autonomous robots and drones: RGB-D sensing, obstacle detection, 3D mapping, feature tracking, and IMU streaming. All modules run on the **Jetson Orin Nano** with an **Intel RealSense D455**, from camera to OpenCV/NumPy processing on the embedded system.
-
-| Capability            | Script                  |
-|-----------------------|-------------------------|
-| RGB + depth viewing   | `realsense_view.py`     |
-| Obstacle detection    | `obstacle_detector.py`  |
-| 3D point cloud capture| `point_cloud_capture.py`|
-| Point cloud viewer    | `view_scan.py`          |
-| Feature tracking      | `simple_tracking.py`    |
-| IMU streaming         | `imu_stream.py`         |
-| Live occupancy map    | `radar_mapper.py`       |
+| Layer | What’s used |
+|-------|-------------|
+| **Platform** | NVIDIA Jetson Orin Nano, Ubuntu 22.04 (L4T 36.4.7) |
+| **Camera** | Intel RealSense D455 RGB-D |
+| **SDK** | RealSense SDK 2.0 (librealsense) built from source with **RSUSB backend** |
+| **Python** | pyrealsense2, numpy (&lt;2.0), opencv-python; optional open3d |
+| **ROS2** | Humble; realsense2_camera node (realsense-ros from [RealSenseAI](https://github.com/realsenseai)) |
 
 ---
 
-## Hardware
+## What I Validated
 
-| Component | Model |
-|-----------|--------|
-| Compute  | NVIDIA Jetson Orin Nano |
-| Camera   | Intel RealSense D455 RGB-D |
+- **D455 enumerates** — `/usr/local/bin/rs-enumerate-devices` and `scripts/check_realsense.py` see the camera (name, serial, firmware).
+- **Depth + color streaming in Python** — Standalone pyrealsense2 scripts stream and capture; e.g. `realsense_view.py`, `scripts/capture_color_depth.py`.
+- **ROS2 node** — `realsense2_camera` launches successfully; topics publish.
+- **Topics confirmed:** `/camera/camera/color/image_raw`, `/camera/camera/depth/image_rect_raw`, `/camera/camera/color/camera_info`, `/camera/camera/depth/camera_info`.
+- **Camera info** — Color and depth `camera_info` publish with correct intrinsics.
 
 ---
 
-## System architecture
-
-Pipeline: **sensor → SDK → bindings → your logic → embedded system.** Getting this running on an embedded GPU is a system-integration task.
+## Repo Layout
 
 ```
-Intel RealSense D455
-        ↓
-librealsense SDK
-        ↓
-pyrealsense2
-        ↓
-Python perception modules
-        ↓
-OpenCV / NumPy processing
-        ↓
-Jetson Orin Nano (embedded system)
+/
+  README.md          # This file
+  LICENSE
+  .gitignore
+  requirements.txt
+  setup.sh           # Optional: pip install deps
+  Makefile           # make check, capture, ros-launch, ros-sanity
+
+  docs/              # Setup and validation
+    hardware_setup.md
+    software_setup.md
+    ros2_setup.md
+    troubleshooting.md
+    validation.md
+
+  scripts/           # Entry-point and validation scripts
+    check_realsense.py      # Verify pyrealsense2 + enumerate device
+    capture_color_depth.py  # Save one color + depth frame (headless OK)
+    center_depth_probe.py   # Print center (or x,y) depth in meters
+    ros_topic_sanity.sh     # Quick ROS2 topic / camera_info check
+    save_ros_frames.py      # Subscribe to ROS topics, save one frame each
+    launch_realsense_ros.sh # Convenience launcher for rs_launch.py
+
+  src/
+    standalone/      # Standalone pyrealsense2 demos (no ROS)
+      realsense_view.py
+      obstacle_detector.py
+      point_cloud_capture.py
+      view_scan.py
+      simple_tracking.py
+      imu_stream.py
+      radar_mapper.py
+      stream_info.py
+    ros2_tools/       # ROS2 helpers
+      topic_monitor.py
+      frame_info_monitor.py
+
+  ros2/               # ROS2 notes and launch examples
+    README.md
+    launch/
+  assets/
+    sample_outputs/   # For saved captures
 ```
 
 ---
 
-## Scripts
+## Quick Start
 
-### 1. `realsense_view.py` — Basic viewer
-
-RGB and depth stream viewer. Use this first to confirm the camera works.
+### 1. Verify RealSense (no ROS)
 
 ```bash
-python3 realsense_view.py
+python3 scripts/check_realsense.py
+# Or: /usr/local/bin/rs-enumerate-devices
 ```
 
-**Controls:** `q` — quit
-
----
-
-### 2. `obstacle_detector.py` — Navigation helper
-
-Monitors a central navigation zone and warns when obstacles are too close.
+### 2. Run Standalone Scripts (camera must be free)
 
 ```bash
-python3 obstacle_detector.py
+# Headless capture (no GUI)
+python3 scripts/capture_color_depth.py -o assets/sample_outputs
+
+# Viewer (needs DISPLAY)
+python3 src/standalone/realsense_view.py
+
+# Obstacle detector, point cloud, IMU, radar mapper, etc.
+python3 src/standalone/obstacle_detector.py
+python3 src/standalone/point_cloud_capture.py
+python3 src/standalone/imu_stream.py --no-gui   # headless
 ```
 
-| Indicator | Meaning |
-|-----------|---------|
-| Yellow rectangle | Monitored zone |
-| Green text | Clear path |
-| Red text | Obstacle &lt; 0.5 m |
+### 3. Launch ROS2 RealSense Node
 
-**Controls:** `q` — quit
-
----
-
-### 3. `point_cloud_capture.py` — 3D scanning
-
-Capture and save 3D point clouds for later use.
+Stop any standalone script using the camera first. Then:
 
 ```bash
-python3 point_cloud_capture.py
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash   # if your workspace is there
+ros2 launch realsense2_camera rs_launch.py
 ```
 
-**Controls:** `s` — save frame as point cloud · `q` — quit  
-**Output:** `scan.npz`
-
----
-
-### 4. `view_scan.py` — Point cloud viewer
-
-Visualize saved `.npz` point cloud scans in 3D.
+Or use the convenience script (if paths match):
 
 ```bash
-pip3 install open3d   # required
-python3 view_scan.py [scan_file.npz]
+./scripts/launch_realsense_ros.sh
 ```
 
-Defaults to `scan.npz` if no file is given.
+### 4. Validate ROS2 Topics
 
----
-
-### 5. `simple_tracking.py` — Feature tracking
-
-Visual feature tracking between frames (motion-from-features style).
+In another terminal (with same sourcing):
 
 ```bash
-python3 simple_tracking.py
+ros2 topic list | grep camera
+ros2 topic echo /camera/camera/color/camera_info --once
+bash scripts/ros_topic_sanity.sh
 ```
 
-Shows feature matches and prints tracking stats. **Controls:** `q` — quit
+### 5. Save Frames from ROS (headless)
 
----
-
-### 6. `imu_stream.py` — IMU streaming
-
-Stream and plot accelerometer and gyroscope data from the camera IMU.
+With the ROS node running:
 
 ```bash
-python3 imu_stream.py
+python3 scripts/save_ros_frames.py -o assets/sample_outputs
 ```
-
-- Real-time plots: accel (X,Y,Z), gyro (X,Y,Z)  
-- Pitch/roll from accel, motion magnitude  
-- **Controls:** `s` — save data · `q` — quit  
-
-**Note:** Needs a RealSense with IMU (e.g. D435i, D455).
 
 ---
 
-### 7. `radar_mapper.py` — 3D radar mapper
+## Common Gotchas
 
-Live occupancy grid with radar-style top-down view. Builds a map as you move the camera.
+- **Headless Jetson** — No DISPLAY means `cv2.imshow()` and rqt viewers fail. Use CLI capture (`scripts/capture_color_depth.py`, `scripts/save_ros_frames.py`) or scripts that support `--no-gui` (e.g. `imu_stream.py --no-gui`).
+- **Camera locked** — Only one process can open the RealSense at a time. If the ROS node is running, standalone pyrealsense2 scripts will fail (and vice versa). Stop the other process first.
+- **Wrong binary** — Prefer `/usr/local/bin/rs-enumerate-devices` for validation. An older binary under `/opt/ros/humble/bin` can shadow your SDK build.
+
+See [docs/troubleshooting.md](docs/troubleshooting.md) for more.
+
+---
+
+## Docs
+
+| Doc | Purpose |
+|-----|---------|
+| [docs/hardware_setup.md](docs/hardware_setup.md) | Jetson, D455, USB, headless note |
+| [docs/software_setup.md](docs/software_setup.md) | Ubuntu, librealsense from source (RSUSB), pyrealsense2, Python deps |
+| [docs/ros2_setup.md](docs/ros2_setup.md) | Workspace, realsense-ros, launch, version matching |
+| [docs/troubleshooting.md](docs/troubleshooting.md) | Fixes for common Jetson + RealSense + ROS2 issues |
+| [docs/validation.md](docs/validation.md) | Step-by-step validation commands |
+
+---
+
+## Makefile
 
 ```bash
-python3 radar_mapper.py
+make check       # scripts/check_realsense.py
+make capture     # capture to assets/sample_outputs
+make ros-launch  # launch RealSense ROS node
+make ros-sanity  # scripts/ros_topic_sanity.sh (source ROS2 first)
 ```
-
-- Top-down radar view, side view (X–Z), live RGB/depth  
-- 2 cm resolution occupancy grid, confidence-based coloring  
-- **Controls:** `c` — clear map · `s` — save map · `q` — quit  
-
----
-
-## Getting started
-
-1. **Check camera:** `python3 realsense_view.py`
-2. **Obstacle check:** `python3 obstacle_detector.py`
-3. **Capture scan:** `python3 point_cloud_capture.py` → then `python3 view_scan.py`
-4. **Tracking:** `python3 simple_tracking.py`
-5. **IMU (if supported):** `python3 imu_stream.py`
-6. **Mapping:** `python3 radar_mapper.py`
 
 ---
 
 ## Requirements
 
-- **Python 3**
-- **Packages:** `pyrealsense2`, `numpy` (&lt;2.0), `opencv-python`
-- **Optional:** `open3d` (for `view_scan.py`)
+- **RealSense SDK 2.0 (librealsense)** — Built from source with RSUSB (recommended on this setup). See [docs/software_setup.md](docs/software_setup.md).
+- **Python 3** — With `pyrealsense2` (from SDK), `numpy` (&lt;2.0), `opencv-python`. Optional: `open3d` for `view_scan.py`.
+- **ROS2 (optional)** — Humble + realsense-ros for ROS2 workflows.
 
 ```bash
-pip3 install numpy opencv-python open3d
+pip3 install -r requirements.txt
 ```
 
-Install `pyrealsense2` per [Intel RealSense documentation](https://github.com/IntelRealSense/librealsense) for your platform (Jetson has specific instructions).
-
 ---
 
-## Tips
+## Next Steps (Not Yet Implemented)
 
-- Update RealSense firmware for best compatibility.
-- Good lighting improves depth quality; typical range 0.3 m–10 m.
-- Textured surfaces give better point clouds; a stable mount helps scans.
-- **Running over SSH (Jetson):** To show OpenCV windows on the Jetson display when SSH'd from a laptop, run:
-  ```bash
-  DISPLAY=:0 XAUTHORITY=/run/user/$(id -u)/gdm/Xauthority python3 realsense_view.py
-  ```
-  (Adjust `XAUTHORity` path if needed for your login session.)
-
----
-
-## Known limitations
-
-- D455 depth is less stable at very close range (&lt;0.5 m).
-- `radar_mapper.py` is memory-heavy; watch Jetson RAM if you run other workloads.
-- Do not commit `scan.npz`; add `*.npz` to `.gitignore` if needed.
-
----
-
-## Future work
-
-- **Navigation module** — From obstacle data to a decision: left/right free space → safest direction → command (e.g. FORWARD / TURN LEFT / TURN RIGHT / STOP).
-- **Object detection + depth** — YOLOv8 / TensorRT / ONNX fused with depth (e.g. "person, 1.8 m, approaching").
-- **Persistent 3D map** — Depth → point cloud accumulation → voxel grid → saved map file.
-- ROS2 publishing, SLAM, GPU-accelerated depth, drone pipelines.
+- Aligned depth–color processing
+- Point cloud generation from ROS or standalone
+- Obstacle detection as navigation decision output
+- Dedicated ROS2 perception nodes
+- Logging / rosbag capture
 
 ---
 
 ## License
 
-MIT License
+MIT. See [LICENSE](LICENSE).

@@ -1,0 +1,8 @@
+# Python dependencies for Jetson RealSense Perception
+# pyrealsense2 comes from the RealSense SDK (librealsense) build — do not install via pip
+
+numpy<2.0
+opencv-python
+
+# Optional: for src/standalone/view_scan.py (point cloud visualization)
+open3d
