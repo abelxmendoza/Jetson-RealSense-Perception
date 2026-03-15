@@ -4,6 +4,10 @@
   <img src="./Jetson-RealSense-PerceptionProject.png" alt="Jetson RealSense Perception" width="700"/>
 </p>
 
+<p align="center">
+  <img src="./JetsonVision.jpeg" alt="Jetson Vision" width="700"/>
+</p>
+
 Embedded RGB-D perception toolkit for **NVIDIA Jetson Orin Nano** and **Intel RealSense D455**. Supports standalone Python (pyrealsense2) and ROS2 Humble workflows. Developed and validated on Ubuntu 22.04 / JetPack L4T 36.4.7.
 
 ---
