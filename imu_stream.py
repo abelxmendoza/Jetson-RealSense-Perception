@@ -1,10 +1,17 @@
 """
 Stream and visualize IMU data (accelerometer and gyroscope) from RealSense camera.
 """
+import argparse
+import os
 import pyrealsense2 as rs
 import numpy as np
 import cv2
 import time
+
+parser = argparse.ArgumentParser(description="Stream IMU data from RealSense camera")
+parser.add_argument("--no-gui", action="store_true", help="Run without OpenCV display windows (headless/SSH/TTY)")
+args = parser.parse_args()
+use_gui = (not args.no_gui) and bool(os.environ.get("DISPLAY"))
 
 # Try to release any existing pipeline connections
 ctx = rs.context()
@@ -101,7 +108,10 @@ max_history = 200  # Keep last 200 samples
 
 try:
     print("\nStreaming IMU data...")
-    print("Press 'q' to quit, 's' to save data to file")
+    if use_gui:
+        print("Press 'q' to quit, 's' to save data to file")
+    else:
+        print("No DISPLAY detected. Running in headless mode (no OpenCV windows). Use Ctrl+C to stop, or run with --no-gui to suppress this message.")
     
     start_time = time.time()
     frame_count = 0
@@ -255,9 +265,13 @@ try:
             cv2.putText(vis_image, f"Gyro  X: {gyro_data.x:6.3f} Y: {gyro_data.y:6.3f} Z: {gyro_data.z:6.3f}", 
                        (10, 590), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
         
-        cv2.imshow("IMU Data Stream", vis_image)
-        
-        key = cv2.waitKey(1) & 0xFF
+        if use_gui:
+            cv2.imshow("IMU Data Stream", vis_image)
+            key = cv2.waitKey(1) & 0xFF
+        else:
+            key = -1
+            time.sleep(0.01)
+
         if key == ord('q'):
             break
         elif key == ord('s'):
@@ -267,14 +281,16 @@ try:
                     accel_history=np.array([(t, a[0], a[1], a[2]) for t, a in accel_history]),
                     gyro_history=np.array([(t, g[0], g[1], g[2]) for t, g in gyro_history]))
             print(f"\nSaved IMU data to {filename}")
-            cv2.putText(vis_image, "SAVED!", (300, 300), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-            cv2.imshow("IMU Data Stream", vis_image)
-            cv2.waitKey(1000)
+            if use_gui:
+                cv2.putText(vis_image, "SAVED!", (300, 300), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                cv2.imshow("IMU Data Stream", vis_image)
+                cv2.waitKey(1000)
 
 except KeyboardInterrupt:
     print("\nStopped by user")
 finally:
     pipeline.stop()
-    cv2.destroyAllWindows()
+    if use_gui:
+        cv2.destroyAllWindows()
     print("IMU streaming stopped")
