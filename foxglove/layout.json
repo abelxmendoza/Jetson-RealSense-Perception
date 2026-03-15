@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "panels": [
+    {"type": "image", "topic": "/camera/camera/color/image_raw", "title": "Color Image"},
+    {"type": "image", "topic": "/camera/camera/depth/image_rect_raw", "title": "Depth Image"},
+    {"type": "topicGraph", "title": "Topic Graph"},
+    {"type": "messageInspector", "title": "Raw Message Inspector"},
+    {"type": "log", "title": "Log Panel"},
+    {"type": "diagnostics", "title": "Diagnostics"}
+  ]
+}

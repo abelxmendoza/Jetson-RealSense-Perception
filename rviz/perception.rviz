@@ -1,0 +1,12 @@
+Panels:
+  - name: Image
+    type: rviz/Image
+    topic: /camera/camera/color/image_raw
+  - name: Depth
+    type: rviz/Image
+    topic: /camera/camera/depth/image_rect_raw
+  - name: TF
+    type: rviz/TF
+  - name: Grid
+    type: rviz/Grid
+Fixed Frame: camera_link

@@ -1,0 +1,7 @@
+realsense2_camera:
+  ros__parameters:
+    enable_color: true
+    enable_depth: true
+    enable_sync: true
+    align_depth: false
+    pointcloud.enable: false

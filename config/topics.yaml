@@ -1,0 +1,6 @@
+expected_topics:
+  - /camera/camera/color/image_raw
+  - /camera/camera/color/camera_info
+  - /camera/camera/depth/image_rect_raw
+  - /camera/camera/depth/camera_info
+  - /camera/camera/extrinsics/depth_to_color

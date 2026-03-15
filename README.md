@@ -151,6 +151,125 @@ python3 scripts/save_ros_frames.py -o assets/sample_outputs
 
 ---
 
+## ROS2 Workflow
+
+This repo supports two complementary workflows:
+
+### 1. Standalone SDK validation
+Use standalone Python scripts when validating hardware, SDK installation, and direct frame capture.
+
+```bash
+python3 scripts/check_realsense.py
+python3 scripts/capture_color_depth.py
+python3 scripts/center_depth_probe.py
+```
+
+These scripts verify:
+- librealsense is installed
+- pyrealsense2 is importable
+- D455 is detected
+- color and depth frames can be captured
+
+### 2. ROS2 robotics workflow
+Use ROS2 when the camera should behave like a robot sensor feeding downstream tools and nodes.
+
+```bash
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+ros2 launch realsense2_camera rs_launch.py
+ros2 topic list | grep camera
+ros2 topic hz /camera/camera/color/image_raw
+ros2 topic echo /camera/camera/color/camera_info --once
+python3 scripts/ros_topic_report.py
+python3 src/ros2_tools/rgbd_topic_probe.py
+```
+
+This workflow is used for:
+- RViz / Foxglove visualization
+- ROS topic inspection
+- downstream perception nodes
+- frame transforms / extrinsics
+- logging / rosbag workflows
+
+## Validation Layers
+
+This repo validates the RealSense stack in layers:
+
+1. Hardware / SDK layer
+   - `scripts/check_realsense.py`
+   - verifies pyrealsense2, device enumeration, firmware visibility, and USB link
+
+2. Direct frame capture layer
+   - `scripts/capture_color_depth.py`
+   - verifies color + depth streaming through pyrealsense2
+
+3. ROS2 camera driver layer
+   - `realsense2_camera` launch
+   - verifies camera topics publish correctly through ROS2
+
+4. ROS2 topic validation layer
+   - `scripts/ros_topic_sanity.sh`, `scripts/ros_topic_report.py`
+   - validates expected topics and camera_info availability
+
+5. Downstream perception layer
+   - `src/ros2_tools/rgbd_topic_probe.py` and future nodes
+   - consumes published image and depth topics
+
+## Recommended Terminal Layout
+
+For ROS2 workflows, use 2-3 terminals:
+
+### Terminal 1 — Camera Driver
+
+Launch the RealSense ROS2 node:
+
+```bash
+ros2 launch realsense2_camera rs_launch.py
+```
+
+### Terminal 2 — ROS2 Inspection
+
+Inspect topics, rates, and camera info:
+
+```bash
+ros2 topic list | grep camera
+ros2 topic hz /camera/camera/color/image_raw
+ros2 topic echo /camera/camera/color/camera_info --once
+python3 scripts/ros_topic_report.py
+```
+
+### Terminal 3 — Visualization (optional)
+
+Use RViz2 or Foxglove on local display or remote client.
+
+## Known ROS2 Notes
+
+- The raw topics are the primary topics to use for robotics workflows:
+  - `/camera/camera/color/image_raw`
+  - `/camera/camera/color/camera_info`
+  - `/camera/camera/depth/image_rect_raw`
+  - `/camera/camera/depth/camera_info`
+  - `/camera/camera/extrinsics/depth_to_color`
+
+- On some setups, compressed image transport plugins may emit warnings for depth image encodings such as `16UC1`. These warnings do not necessarily indicate failure of the raw color/depth pipeline.
+
+- For robotics and perception development, prefer raw image topics over compressed topics unless bandwidth reduction is specifically required.
+
+## Next ROS2 Perception Step
+
+The next recommended step is to build ROS2 subscriber nodes that consume:
+- `/camera/camera/color/image_raw`
+- `/camera/camera/depth/image_rect_raw`
+- `/camera/camera/color/camera_info`
+
+Examples of useful next nodes:
+- center-depth monitor
+- frame-saving ROS subscriber
+- RGB-D alignment / annotation node
+- object detection + depth estimation node
+
+---
+
 ## Common Gotchas
 
 - **Headless Jetson** — No DISPLAY means `cv2.imshow()` and rqt viewers fail. Use CLI capture (`scripts/capture_color_depth.py`, `scripts/save_ros_frames.py`) or scripts that support `--no-gui` (e.g. `imu_stream.py --no-gui`).

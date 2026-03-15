@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>jetson_realsense_perception</name>
+  <version>0.1.0</version>
+  <description>ROS2 perception utilities for Jetson and RealSense.</description>
+  <maintainer email="you@example.com">Your Name</maintainer>
+  <license>MIT</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>realsense2_camera</exec_depend>
+  <exec_depend>foxglove_bridge</exec_depend>
+</package>
