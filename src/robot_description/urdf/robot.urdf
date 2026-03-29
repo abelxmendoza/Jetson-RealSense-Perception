@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<robot name="jetson_rig">
+
+  <!-- Base of the physical rig (Jetson Orin Nano mount) -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.15 0.10 0.05"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- RealSense D455 camera frame -->
+  <!-- D455 optical centre sits ~20cm above base, centred, facing forward -->
+  <link name="camera_link">
+    <visual>
+      <geometry>
+        <box size="0.09 0.025 0.025"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <!-- x=0 (centred), y=0 (centred), z=0.2 (20cm above base) -->
+    <!-- rpy: no rotation — camera faces same direction as base_link +x -->
+    <origin xyz="0 0 0.2" rpy="0 0 0"/>
+  </joint>
+
+  <!--
+    D455 publishes its data in the optical frame (z-forward, x-right, y-down).
+    The realsense2_camera driver publishes the optical→link transform automatically,
+    so we only need to describe the link frame here.
+  -->
+
+</robot>
