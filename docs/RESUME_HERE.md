@@ -7,8 +7,8 @@
 ```
 
 The dashboard is on branch `codex/recorded-run-dashboard`. It is a local-only
-recorded-run inspector and needs only the Python 3 included with macOS. It does
-not need ROS, a Jetson, a RealSense camera, API keys, or paid services.
+recorded-run inspector and needs only Python 3.10 or newer. It does not need
+ROS, a Jetson, a RealSense camera, API keys, or paid services.
 
 ## Launch on this Mac
 
@@ -27,6 +27,29 @@ A convenience launcher named `Open Depth Bench Dashboard.command` is also on
 the Desktop. Double-click it to start (or reuse) the localhost server and open
 the dashboard. Its server log is written to `.bench_dashboard/server.log` in
 this repository.
+
+## Launch on Linux
+
+From a Linux checkout:
+
+```bash
+cd /path/to/Jetson-RealSense-Perception
+./scripts/open_bench_dashboard_linux.sh
+```
+
+The Linux launcher also binds to localhost. It uses `xdg-open` or `gio` when
+available; on a headless machine it prints the URL instead. To use a different
+port:
+
+```bash
+BENCH_DASHBOARD_PORT=8877 ./scripts/open_bench_dashboard_linux.sh
+```
+
+You can also use the same foreground command on macOS or Linux:
+
+```bash
+make bench-dashboard
+```
 
 ## Start point and controls
 
@@ -52,6 +75,8 @@ is uploaded to a cloud service.
 cd /Users/abel_elreaper/Desktop/projects/Jetson-RealSense-Perception
 python3 scripts/replay_bench.py tests/fixtures/bench_synthetic.jsonl
 python3 -m unittest discover -s tests -v
+# Equivalent convenience target:
+make test-offline
 ```
 
 To save a report that the dashboard can open later:
@@ -75,3 +100,5 @@ SLAM, environment reconstruction, or a vehicle-control interface.
 
 Future PX4 recording consumption, Omega1 rover-adapter consumption, and
 RealmForge raw RGB-D/calibration support remain planned and are not implemented.
+See [INTEGRATION_GUIDE.md](INTEGRATION_GUIDE.md) for the portable report boundary
+and safe parallel-work plan for sibling repositories.

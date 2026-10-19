@@ -21,6 +21,14 @@ class BenchPolicy:
     min_valid_depth_fraction: float = 0.50
     max_data_age_ms: float = 500.0
 
+    def __post_init__(self) -> None:
+        if not _finite_number(self.stop_distance_m) or self.stop_distance_m <= 0:
+            raise ValueError("stop_distance_m must be a positive finite number")
+        if not _finite_number(self.min_valid_depth_fraction) or not 0 <= self.min_valid_depth_fraction <= 1:
+            raise ValueError("min_valid_depth_fraction must be between 0 and 1")
+        if not _finite_number(self.max_data_age_ms) or self.max_data_age_ms < 0:
+            raise ValueError("max_data_age_ms must be a non-negative finite number")
+
     def to_dict(self) -> dict[str, float]:
         return asdict(self)
 

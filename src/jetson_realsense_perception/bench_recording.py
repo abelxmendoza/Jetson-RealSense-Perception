@@ -86,6 +86,10 @@ def parse_jsonl_text(text: str, name: str = "recording.jsonl") -> BenchRecording
                 raise RecordingError(f"line {line_number}: metadata must appear before samples")
             if metadata:
                 raise RecordingError(f"line {line_number}: duplicate metadata record")
+            if record.get("schema_version", 1) != 1:
+                raise RecordingError(
+                    f"line {line_number}: unsupported schema_version {record.get('schema_version')!r}"
+                )
             metadata = dict(record)
         elif record_type == "sample":
             samples.append(_normalize_sample(record, line_number, len(samples)))

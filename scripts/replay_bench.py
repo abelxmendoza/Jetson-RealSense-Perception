@@ -75,12 +75,16 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
-    args = create_parser().parse_args()
-    policy = BenchPolicy(
-        stop_distance_m=args.stop_distance_m,
-        min_valid_depth_fraction=args.min_valid_depth_fraction,
-        max_data_age_ms=args.max_data_age_ms,
-    )
+    parser = create_parser()
+    args = parser.parse_args()
+    try:
+        policy = BenchPolicy(
+            stop_distance_m=args.stop_distance_m,
+            min_valid_depth_fraction=args.min_valid_depth_fraction,
+            max_data_age_ms=args.max_data_age_ms,
+        )
+    except ValueError as exc:
+        parser.error(str(exc))
     try:
         report = build_report(load_jsonl(args.recording), policy)
     except RecordingError as exc:

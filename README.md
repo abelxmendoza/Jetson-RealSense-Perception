@@ -216,9 +216,11 @@ python3 scripts/bench_dashboard.py
 
 Open [http://127.0.0.1:8765](http://127.0.0.1:8765). See
 [docs/RESUME_HERE.md](docs/RESUME_HERE.md) for controls, tests, and exact Mac
-launch commands, and [docs/BENCH_DATA_CONTRACT.md](docs/BENCH_DATA_CONTRACT.md)
-for the recording/report format. This offline inspector is not live camera
-viewing or physical validation.
+and Linux launch commands, [docs/BENCH_DATA_CONTRACT.md](docs/BENCH_DATA_CONTRACT.md)
+for the recording/report format, and
+[docs/INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md) for sibling-repository
+consumption. This offline inspector is not live camera viewing or physical
+validation.
 
 ---
 

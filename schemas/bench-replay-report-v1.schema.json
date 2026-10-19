@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/abelxmendoza/Jetson-RealSense-Perception/schemas/bench-replay-report-v1.schema.json",
+  "title": "Depth bench replay report v1",
+  "type": "object",
+  "required": ["report_type", "schema_version", "recording", "policy", "summary", "events"],
+  "properties": {
+    "report_type": { "const": "bench_replay_report" },
+    "schema_version": { "const": 1 },
+    "recording": {
+      "type": "object",
+      "required": ["name", "source", "source_label", "metadata"],
+      "properties": {
+        "name": { "type": "string" },
+        "source": { "enum": ["synthetic", "hardware", "unknown"] },
+        "source_label": { "type": "string" },
+        "metadata": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "required": ["stop_distance_m", "min_valid_depth_fraction", "max_data_age_ms"],
+      "properties": {
+        "stop_distance_m": { "type": "number" },
+        "min_valid_depth_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "max_data_age_ms": { "type": "number", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "required": ["outcomes", "statuses", "total"],
+      "properties": {
+        "outcomes": { "$ref": "#/$defs/outcomeCounts" },
+        "statuses": { "$ref": "#/$defs/statusCounts" },
+        "total": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/event" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "outcomeCounts": {
+      "type": "object",
+      "required": ["PASS", "FAIL", "SKIP"],
+      "properties": {
+        "PASS": { "type": "integer", "minimum": 0 },
+        "FAIL": { "type": "integer", "minimum": 0 },
+        "SKIP": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "statusCounts": {
+      "type": "object",
+      "required": ["CLEAR", "STOP", "SENSOR_FAULT"],
+      "properties": {
+        "CLEAR": { "type": "integer", "minimum": 0 },
+        "STOP": { "type": "integer", "minimum": 0 },
+        "SENSOR_FAULT": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "event": {
+      "type": "object",
+      "required": [
+        "sequence", "timestamp_s", "nearest_distance_m", "valid_depth_fraction",
+        "data_age_ms", "capture_fault_reason", "expected_status", "status",
+        "fault_reason", "outcome"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "timestamp_s": { "type": "number" },
+        "nearest_distance_m": { "type": "number" },
+        "valid_depth_fraction": { "type": "number" },
+        "data_age_ms": { "type": "number" },
+        "capture_fault_reason": { "type": ["string", "null"] },
+        "expected_status": {
+          "type": ["string", "null"],
+          "enum": ["CLEAR", "STOP", "SENSOR_FAULT", null]
+        },
+        "status": { "enum": ["CLEAR", "STOP", "SENSOR_FAULT"] },
+        "fault_reason": { "type": ["string", "null"] },
+        "outcome": { "enum": ["PASS", "FAIL", "SKIP"] }
+      },
+      "additionalProperties": false
+    }
+  }
+}
