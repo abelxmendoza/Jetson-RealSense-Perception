@@ -206,6 +206,20 @@ python3 src/standalone/obstacle_detector.py --no-gui
 python3 src/standalone/imu_stream.py --no-gui
 ```
 
+### Recorded-run dashboard (Mac, no hardware required)
+
+Inspect the checked-in synthetic depth-health recording in a local browser:
+
+```bash
+python3 scripts/bench_dashboard.py
+```
+
+Open [http://127.0.0.1:8765](http://127.0.0.1:8765). See
+[docs/RESUME_HERE.md](docs/RESUME_HERE.md) for controls, tests, and exact Mac
+launch commands, and [docs/BENCH_DATA_CONTRACT.md](docs/BENCH_DATA_CONTRACT.md)
+for the recording/report format. This offline inspector is not live camera
+viewing or physical validation.
+
 ---
 
 ## Hardware Notes
