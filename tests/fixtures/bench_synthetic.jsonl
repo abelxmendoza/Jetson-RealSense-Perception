@@ -1,0 +1,11 @@
+{"record_type":"metadata","schema_version":1,"source":"synthetic","name":"Checked-in policy transition fixture","description":"Offline-only fixture covering CLEAR, STOP, and SENSOR_FAULT. Not hardware validation."}
+{"record_type":"sample","sequence":0,"timestamp_s":0.0,"nearest_distance_m":2.40,"valid_depth_fraction":0.94,"data_age_ms":22,"expected_status":"CLEAR"}
+{"record_type":"sample","sequence":1,"timestamp_s":0.5,"nearest_distance_m":1.45,"valid_depth_fraction":0.91,"data_age_ms":24,"expected_status":"CLEAR"}
+{"record_type":"sample","sequence":2,"timestamp_s":1.0,"nearest_distance_m":0.98,"valid_depth_fraction":0.89,"data_age_ms":28,"expected_status":"STOP"}
+{"record_type":"sample","sequence":3,"timestamp_s":1.5,"nearest_distance_m":0.63,"valid_depth_fraction":0.87,"data_age_ms":27,"expected_status":"STOP"}
+{"record_type":"sample","sequence":4,"timestamp_s":2.0,"nearest_distance_m":1.22,"valid_depth_fraction":0.92,"data_age_ms":26,"expected_status":"CLEAR"}
+{"record_type":"sample","sequence":5,"timestamp_s":2.5,"nearest_distance_m":1.18,"valid_depth_fraction":0.31,"data_age_ms":29,"expected_status":"SENSOR_FAULT"}
+{"record_type":"sample","sequence":6,"timestamp_s":3.0,"nearest_distance_m":1.30,"valid_depth_fraction":0.88,"data_age_ms":780,"expected_status":"SENSOR_FAULT"}
+{"record_type":"sample","sequence":7,"timestamp_s":3.5,"nearest_distance_m":1.76,"valid_depth_fraction":0.90,"data_age_ms":25,"expected_status":"CLEAR"}
+{"record_type":"sample","sequence":8,"timestamp_s":4.0,"nearest_distance_m":0.82,"valid_depth_fraction":0.85,"data_age_ms":31,"expected_status":null}
+{"record_type":"sample","sequence":9,"timestamp_s":4.5,"nearest_distance_m":2.05,"valid_depth_fraction":0.93,"data_age_ms":23,"expected_status":"CLEAR"}

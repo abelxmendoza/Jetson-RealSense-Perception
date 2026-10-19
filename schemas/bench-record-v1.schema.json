@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/abelxmendoza/Jetson-RealSense-Perception/schemas/bench-record-v1.schema.json",
+  "title": "Depth bench JSONL record v1",
+  "description": "Validate each non-comment line of a bench JSONL recording independently.",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["record_type", "schema_version", "source"],
+      "properties": {
+        "record_type": { "const": "metadata" },
+        "schema_version": { "const": 1 },
+        "source": { "enum": ["synthetic", "hardware", "unknown"] },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "recorded_at": { "type": "string" },
+        "camera": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "required": ["timestamp_s", "nearest_distance_m", "valid_depth_fraction", "data_age_ms"],
+      "properties": {
+        "record_type": { "enum": ["sample", null] },
+        "sequence": { "type": "integer", "minimum": 0 },
+        "timestamp_s": { "type": "number" },
+        "nearest_distance_m": { "type": "number" },
+        "valid_depth_fraction": { "type": "number" },
+        "data_age_ms": { "type": "number" },
+        "capture_fault_reason": { "type": ["string", "null"] },
+        "expected_status": {
+          "type": ["string", "null"],
+          "enum": ["CLEAR", "STOP", "SENSOR_FAULT", null]
+        }
+      },
+      "additionalProperties": true
+    }
+  ]
+}
