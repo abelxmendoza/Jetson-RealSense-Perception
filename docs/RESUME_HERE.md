@@ -55,3 +55,26 @@ session. Use PROJECT_PLAN.md milestone order. Keep all four projects sovereign.
 - Remaining work: production importer in RealmForge, collision asset decisions,
   Gazebo world export and runtime tests; later Omega and PX4 adapters. No real
   camera/SLAM/sensor-fusion result is implied by the synthetic evidence.
+
+## Cross-repository continuation (2026-10-19)
+
+The user committed/pushed the producer work as ab361f2 on
+feature/shared-environments. All four GitHub CI jobs passed (Ubuntu/macOS,
+Python 3.10/3.12), including HTTP tests unavailable in the local sandbox.
+
+RealmForge remote main was 37 commits ahead of its desktop copy. The importer
+was tested with remote main b64409d, preserving its existing property/GLB scan
+features. Draft PR: https://github.com/abelxmendoza/RealmForge-XR/pull/46
+Branch: feature/perception-scan-map-import; commit c946b3c.
+Validation there: 474 tests, TypeScript, and production build passed.
+
+The new RealmForge importer loads selected manifest/YAML/PGM files into native
+metric navigation proxies. It retains unknown blockers and existing replacement
+confirmation. It does NOT automatically import/align mesh visuals, export Gazebo
+worlds, or integrate Omega/PX4. Browser/headset rendering remains unverified.
+
+Next: review PR 46; test the actual browser import; connect existing GLB visuals
+and navigation proxies without losing metric alignment, then pursue the Gazebo
+milestone. Original desktop RealmForge checkout was not modified. Updates from
+this point were published through the GitHub connector; fetch current remote
+branches before continuing from older local commits.
