@@ -1,0 +1,39 @@
+name: Offline bench replay
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-tests:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+        python-version: ["3.10", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install simulation dependency
+        run: python3 -m pip install -r requirements-offline.txt
+      - name: Run offline tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Generate synthetic replay report
+        run: >-
+          python3 scripts/replay_bench.py
+          tests/fixtures/bench_synthetic.jsonl
+          --output /tmp/bench-report.json
+      - name: Build and validate portable synthetic environment
+        run: |
+          python3 scripts/build_scan.py /tmp/ci-room-scan --frames 4
+          python3 scripts/validate_scan.py /tmp/ci-room-scan
+      - name: Compile Python sources
+        run: python3 -m compileall -q src/jetson_realsense_perception scripts tests
+      - name: Check Linux launcher syntax
+        if: runner.os == 'Linux'
+        run: bash -n scripts/open_bench_dashboard_linux.sh

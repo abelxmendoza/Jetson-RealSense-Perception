@@ -1,3 +1,9 @@
+<!-- Agent entrypoint: read AGENTS.md before modifications. -->
+
+Project direction and handoff: [roadmap](docs/PROJECT_PLAN.md),
+[environment contract v1](docs/ENVIRONMENT_CONTRACT.md),
+[current status](docs/RESUME_HERE.md).
+
 # Real-Time Depth-Based Obstacle Awareness System (Jetson + ROS2)
 
 <p align="center">
@@ -206,6 +212,22 @@ python3 src/standalone/obstacle_detector.py --no-gui
 python3 src/standalone/imu_stream.py --no-gui
 ```
 
+### Recorded-run dashboard (Mac, no hardware required)
+
+Inspect the checked-in synthetic depth-health recording in a local browser:
+
+```bash
+python3 scripts/bench_dashboard.py
+```
+
+Open [http://127.0.0.1:8765](http://127.0.0.1:8765). See
+[docs/RESUME_HERE.md](docs/RESUME_HERE.md) for controls, tests, and exact Mac
+and Linux launch commands, [docs/BENCH_DATA_CONTRACT.md](docs/BENCH_DATA_CONTRACT.md)
+for the recording/report format, and
+[docs/INTEGRATION_GUIDE.md](docs/INTEGRATION_GUIDE.md) for sibling-repository
+consumption. This offline inspector is not live camera viewing or physical
+validation.
+
 ---
 
 ## Hardware Notes
@@ -232,3 +254,85 @@ python3 src/standalone/imu_stream.py --no-gui
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+### Open the bench dashboard on Linux
+
+From the repository root:
+
+```bash
+bash scripts/open_bench_dashboard_linux.sh
+```
+
+Requires Python 3.10+; the offline dashboard needs no ROS, camera, or pip packages.
+Open http://127.0.0.1:8765 if a browser does not open automatically. To run in the
+foreground and stop with Ctrl-C, use `make bench-dashboard`. Set
+`BENCH_DASHBOARD_PORT` to use another port with the launcher. Camera recording
+additionally requires NumPy, pyrealsense2, and a connected RealSense camera.
+
+### Simulated depth camera on your Linux laptop
+
+```bash
+make simulate-depth
+# Optional separate, real RGB webcam preview:
+python3 scripts/simulate_depth.py --webcam 0 --frames 1800
+# No display or camera required; output directory must not already exist:
+python3 scripts/simulate_depth.py --headless --output /tmp/my-depth-run
+python3 scripts/replay_bench.py /tmp/my-depth-run/recording.jsonl
+```
+
+Requires NumPy; desktop mode also requires OpenCV with GUI support. The existing
+requirements.txt includes both. The webcam is opened only when `--webcam` is
+supplied, is shown locally, and is not recorded or used to infer metric depth.
+
+The demo raycasts a room and an approaching/retreating cuboid through calibrated
+pinhole rays. It displays synthetic depth, the central decision ROI, and a
+camera-relative obstacle map (6 m wide, 6 m forward). White at the bottom of the
+map marks the camera. No world localization or persistent mapping is implied.
+
+Controls: **W/S** moves the obstacle closer/farther; **0** healthy, **1** depth
+pixel dropout, **2** frozen frames, **3** disconnect, **A** automatic scenario,
+**Q/Escape** quits. Default duration is 240 frames (~16 s in desktop mode).
+
+Exports contain calibration JSON, synthetic-labeled bench JSONL, and a final
+NPZ with metric depth and optical-frame obstacle points. Coordinates are x right,
+y down, z forward; depth is axial z in metres. Frozen frames retain capture time
+so the shared health policy detects stale data. Invalid depth and capture faults
+fail closed. The central ROI drives STOP/CLEAR; the map includes a wider field
+of view and excludes floor/ceiling using a fixed camera-height band.
+
+`DepthFrame` and `CameraModel` in
+`src/jetson_realsense_perception/depth_pipeline.py` define the adapter boundary.
+Future RealSense input must convert raw units to metres, provide calibrated
+intrinsics and timestamps in the evaluation clock domain. PX4/ROS frame
+transforms, rover commands, and RealmForge ingestion are still future adapters.
+This ideal geometry simulator does not validate real camera noise, latency,
+robot braking, or Jetson performance.
+
+### Shared room reconstruction and map export
+
+```bash
+python3 scripts/build_scan.py /tmp/room-scan --frames 36 --mesh
+```
+
+Builds a synthetic-labeled scan package with Open3D-reconstructed OBJ, PLY cloud,
+ROS occupancy YAML/PGM, intrinsics, depth frames and known camera poses. See
+[Shared scans](docs/SHARED_SCANS.md) for external posed-depth input, RTAB-Map export
+packaging and the Omega1/RealmForge integration boundary. These are portable
+outputs; the sibling-project importers and real-camera SLAM are not implemented.
+
+### Validate and exchange environment packages
+
+```bash
+python3 -m pip install -r requirements-offline.txt
+python3 scripts/validate_scan.py /tmp/room-scan
+```
+
+Mesh reconstruction additionally uses `requirements-mapping.txt`. Validation
+checks contract consistency, package-local files, occupancy encoding and posed
+recordings; it does not certify reconstruction accuracy or robot safety.
+`schemas/perception-scan-v1.schema.json` describes the manifest; the Python
+validator additionally checks referenced assets and cross-file consistency.
+
+`export_consumers.py` and `scan_consumers.py` are experimental adapter examples,
+not installed Omega1 or RealmForge integrations. The production adapters belong
+in those independent repositories. No sibling checkout is required by core tests.

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Perception scan manifest v1",
+  "type": "object",
+  "required": [
+    "package_type",
+    "schema_version",
+    "source",
+    "pose_source",
+    "units",
+    "frame",
+    "axes",
+    "T_realmforge_map",
+    "files"
+  ],
+  "properties": {
+    "package_type": {
+      "const": "perception_scan"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "source": {
+      "enum": [
+        "synthetic",
+        "hardware",
+        "dataset"
+      ]
+    },
+    "pose_source": {
+      "enum": [
+        "ground_truth",
+        "external",
+        "rtabmap"
+      ]
+    },
+    "units": {
+      "const": "metres"
+    },
+    "frame": {
+      "const": "map"
+    },
+    "axes": {
+      "const": {
+        "x": "forward",
+        "y": "left",
+        "z": "up"
+      }
+    },
+    "T_realmforge_map": {
+      "const": [
+        [
+          0,
+          -1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          -1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ]
+    },
+    "files": {
+      "type": "object",
+      "required": [
+        "point_cloud",
+        "occupancy"
+      ],
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "frames": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "additionalProperties": true
+}

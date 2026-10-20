@@ -1,0 +1,2 @@
+# Headless synthetic depth, map exports and core tests (Python >=3.10)
+numpy>=1.24,<2

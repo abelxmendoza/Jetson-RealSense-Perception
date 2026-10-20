@@ -1,0 +1,2 @@
+{"record_type":"metadata","schema_version":1,"source":"hardware","name":"Hardware label UI fixture","description":"Format-only test fixture; it does not claim physical validation."}
+{"record_type":"sample","sequence":0,"timestamp_s":0.0,"nearest_distance_m":1.8,"valid_depth_fraction":0.90,"data_age_ms":20,"expected_status":null}

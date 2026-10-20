@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Depth Bench Inspector</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">JETSON · REALSENSE · OFFLINE REPLAY</p>
+        <h1>Depth Bench Inspector</h1>
+      </div>
+      <label class="file-button">
+        <span>Load recording or report</span>
+        <input id="file-input" type="file" accept=".jsonl,.json,application/json">
+      </label>
+    </header>
+
+    <main>
+      <section id="error-panel" class="error-panel" role="alert" hidden></section>
+
+      <section class="run-header panel" aria-labelledby="run-name">
+        <div>
+          <p class="label">RECORDING</p>
+          <h2 id="run-name">Loading synthetic fixture…</h2>
+        </div>
+        <div id="source-badge" class="source-badge">—</div>
+        <div class="privacy-note">Local processing only · no upload</div>
+      </section>
+
+      <section class="state-grid" aria-label="Current frame">
+        <article id="state-card" class="state-card panel status-fault">
+          <p class="label">POLICY STATE</p>
+          <div id="state-value" class="state-value">—</div>
+          <p id="state-subtitle" class="state-subtitle">Waiting for replay data</p>
+        </article>
+        <article class="metric panel">
+          <p class="label">NEAREST</p>
+          <strong id="nearest-value">—</strong><span> m</span>
+        </article>
+        <article class="metric panel">
+          <p class="label">VALID DEPTH</p>
+          <strong id="valid-value">—</strong><span> %</span>
+        </article>
+        <article class="metric panel">
+          <p class="label">DATA AGE</p>
+          <strong id="age-value">—</strong><span> ms</span>
+        </article>
+      </section>
+
+      <section class="panel timeline-panel">
+        <div class="section-heading">
+          <div>
+            <p class="label">RUN TIMELINE</p>
+            <h2><span id="time-value">0.00</span> s</h2>
+          </div>
+          <div id="event-position" class="event-position">0 / 0</div>
+        </div>
+        <div id="timeline" class="timeline" aria-label="Run event timeline"></div>
+        <input id="scrubber" class="scrubber" type="range" min="0" max="0" value="0" aria-label="Scrub replay">
+        <div class="transport">
+          <button id="previous-button" type="button" aria-label="Previous event">← Step</button>
+          <button id="play-button" class="primary" type="button">Play</button>
+          <button id="next-button" type="button" aria-label="Next event">Step →</button>
+          <label class="speed">Speed
+            <select id="speed-select">
+              <option value="0.5">0.5×</option>
+              <option value="1" selected>1×</option>
+              <option value="2">2×</option>
+              <option value="4">4×</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="lower-grid">
+        <article class="panel">
+          <p class="label">EXPECTED RESULT COMPARISON</p>
+          <div class="counts">
+            <div><strong id="pass-count">0</strong><span>PASS</span></div>
+            <div><strong id="fail-count">0</strong><span>FAIL</span></div>
+            <div><strong id="skip-count">0</strong><span>SKIP</span></div>
+          </div>
+          <p class="fine-print">SKIP means no expected state was supplied. It is never counted as PASS.</p>
+        </article>
+        <article class="panel detail-panel">
+          <p class="label">EVENT DETAIL</p>
+          <dl>
+            <div><dt>Fault reason</dt><dd id="fault-reason">—</dd></div>
+            <div><dt>Expected</dt><dd id="expected-value">—</dd></div>
+            <div><dt>Outcome</dt><dd id="outcome-value">—</dd></div>
+            <div><dt>Policy</dt><dd id="policy-value">—</dd></div>
+          </dl>
+        </article>
+      </section>
+
+      <p class="scope-note">Recorded-run inspection only. This is not a live camera view, physical validation, SLAM, environment reconstruction, or a vehicle-control interface.</p>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
